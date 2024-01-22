@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Dashboard = () => {
+const Quizanalysis = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [questionCount, setQuestionCount] = useState(0);
   const [totalQuizImpressions, setTotalQuizImpressions] = useState(0);
@@ -30,20 +30,18 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, []); // Empty dependency array to run the effect only once
+  }, []);
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      <p>Total quizzes created: {quizzes.length}</p>
-      <p>Total questions created: {questionCount}</p>
-      <p>Total quiz impressions: {totalQuizImpressions}</p>
-
-      <h2>List of Quizzes with Impressions</h2>
       <ul>
-        {quizzes.map((quiz) => (
+        {quizzes.map((quiz,index) => (
           <li key={quiz._id}>
             <strong>{quiz.quizName}</strong> - Impressions: {quiz.impressionofQuiz}
+            <p>- created on: {quiz.date}</p> 
+        <p>
+            <a href={`/question-analysis/${quiz._id}`}>Question Analytics</a>
+        </p>
           </li>
         ))}
       </ul>
@@ -51,4 +49,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Quizanalysis;

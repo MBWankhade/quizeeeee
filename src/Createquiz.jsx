@@ -2,15 +2,23 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const Createquiz = () => {
-  
   const [quizData, setQuizData] = useState({
     userId: localStorage.getItem('userId'),
     quizName: '',
     quizType: '',
     numQuestions: 1,
-    questions: [{ question: '', options: ['', ''], correctOption: null, optionType: '', timer: '' ,impressionofQuestion:0}],
+    questions: [
+      {
+        question: '',
+        options: [{ option: '', impressionofOption: 0 }, { option: '', impressionofOption: 0 }],
+        correctOption: null,
+        optionType: '',
+        timer: '',
+        impressionofQuestion: 0,
+      },
+    ],
     quizId: null, // New field to store the unique ID
-    impressionofQuiz:0,
+    impressionofQuiz: 0,
   });
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -28,12 +36,18 @@ const Createquiz = () => {
   const handleOptionTypeChange = (questionIndex, e) => {
     const updatedQuestions = [...quizData.questions];
     if (!updatedQuestions[questionIndex]) {
-      updatedQuestions[questionIndex] = { question: '', options: ['', ''], correctOption: null, optionType: '', timer: '' };
+      updatedQuestions[questionIndex] = {
+        question: '',
+        options: [{ option: '', impressionofOption: 0 }, { option: '', impressionofOption: 0 }],
+        correctOption: null,
+        optionType: '',
+        timer: '',
+      };
     }
     updatedQuestions[questionIndex].optionType = e.target.value;
 
     // Clear existing option values if option type is changed
-    updatedQuestions[questionIndex].options = ['', ''];
+    updatedQuestions[questionIndex].options = [{ option: '', impressionofOption: 0 }, { option: '', impressionofOption: 0 }];
     updatedQuestions[questionIndex].correctOption = null;
 
     setQuizData({ ...quizData, questions: updatedQuestions });
@@ -53,7 +67,25 @@ const Createquiz = () => {
 
   const handleOptionChange = (questionIndex, optionIndex, e) => {
     const updatedQuestions = [...quizData.questions];
-    updatedQuestions[questionIndex].options[optionIndex] = e.target.value;
+    updatedQuestions[questionIndex].options[optionIndex].option = e.target.value;
+    setQuizData({ ...quizData, questions: updatedQuestions });
+  };
+
+  const handleOptionCombinedChange = (questionIndex, optionIndex, e) => {
+    const updatedQuestions = [...quizData.questions];
+    const oldvalue = updatedQuestions[questionIndex].options[optionIndex].option;
+    const splitStrings = oldvalue.split('***');
+    let firstString = splitStrings[0]?.trim() || '';
+    let secondString = splitStrings[1]?.trim() || '';
+    const firstChild = e.target.parentElement.children[0];
+    const secondChild = e.target.parentElement.children[1];
+    if (e.target === firstChild) {
+      firstString = firstChild.value;
+    } else {
+      secondString = secondChild.value;
+    }
+    const value = firstString + '***' + secondString;
+    updatedQuestions[questionIndex].options[optionIndex].option = value;
     setQuizData({ ...quizData, questions: updatedQuestions });
   };
 
@@ -70,7 +102,13 @@ const Createquiz = () => {
       numQuestions: quizData.numQuestions + 1,
       questions: [
         ...quizData.questions,
-        { question: '', options: ['', ''], correctOption: null, optionType: '', timer: '' },
+        {
+          question: '',
+          options: [{ option: '', impressionofOption: 0 }, { option: '', impressionofOption: 0 }],
+          correctOption: null,
+          optionType: '',
+          timer: '',
+        },
       ],
     });
   };
@@ -104,7 +142,7 @@ const Createquiz = () => {
   const handleAddOption = (questionIndex) => {
     if (quizData.questions[questionIndex].options.length < 4) {
       const updatedQuestions = [...quizData.questions];
-      updatedQuestions[questionIndex].options.push('');
+      updatedQuestions[questionIndex].options.push({ option: '', impressionofOption: 0 });
       setQuizData({ ...quizData, questions: updatedQuestions });
     }
   };
@@ -122,7 +160,7 @@ const Createquiz = () => {
     const currentQuestion = quizData.questions[currentQuestionIndex];
     if (
       currentQuestion.question.trim() === '' ||
-      currentQuestion.options.some((option) => option.trim() === '') ||
+      currentQuestion.options.some((option) => option.option.trim() === '') ||
       (quizData.quizType === 'qa' && currentQuestion.correctOption === null) ||
       currentQuestion.optionType.trim() === '' ||
       (quizData.quizType === 'qa' && currentQuestion.timer.trim() === '')
@@ -132,7 +170,6 @@ const Createquiz = () => {
     }
 
     try {
-      console.log(quizData)
       const response = await axios.post('http://localhost:3000/api/saveQuiz', quizData);
 
       if (response.data.success) {
@@ -180,13 +217,9 @@ const Createquiz = () => {
           <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
             {quizData.questions.map((question, index) => (
               <div key={index}>
-                <button onClick={() => handleTabClick(index)}>
-                  Question {index + 1}
-                </button>
+                <button onClick={() => handleTabClick(index)}>Question {index + 1}</button>
                 {index > 0 && index <= quizData.numQuestions - 1 && (
-                  <button onClick={() => handleRemoveQuestion(index)}>
-                    Remove
-                  </button>
+                  <button onClick={() => handleRemoveQuestion(index)}>Remove</button>
                 )}
               </div>
             ))}
@@ -236,7 +269,7 @@ const Createquiz = () => {
                 type="text"
                 value={quizData.questions[currentQuestionIndex].question}
                 onChange={(e) => handleQuestionChange(currentQuestionIndex, e)}
-                placeholder='Poll Question'
+                placeholder="Poll Question"
               />
             </label>
 
@@ -244,12 +277,31 @@ const Createquiz = () => {
 
             {[...Array(quizData.questions[currentQuestionIndex].options.length || 2)].map((_, optionIndex) => (
               <div key={optionIndex}>
-                <input
-                  type="text"
-                  placeholder={quizData.questions[currentQuestionIndex].optionType === 'image' ? 'Image URL' : 'Option Text'}
-                  value={quizData.questions[currentQuestionIndex].options[optionIndex] || ''}
-                  onChange={(e) => handleOptionChange(currentQuestionIndex, optionIndex, e)}
-                />
+                {quizData.questions[currentQuestionIndex].optionType === 'both' ? (
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Text"
+                      value={quizData.questions[currentQuestionIndex]?.options[optionIndex]?.option.split('***')[0]?.trim() || ''}
+                      onChange={(e) => handleOptionCombinedChange(currentQuestionIndex, optionIndex, e)}
+                    />
+                    <input
+                      type="link"
+                      placeholder="Image URL"
+                      value={quizData.questions[currentQuestionIndex]?.options[optionIndex]?.option.split('***')[1]?.trim() || ''}
+                      onChange={(e) => handleOptionCombinedChange(currentQuestionIndex, optionIndex, e)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Text"
+                      value={quizData.questions[currentQuestionIndex].options[optionIndex]?.option || ''}
+                      onChange={(e) => handleOptionChange(currentQuestionIndex, optionIndex, e)}
+                    />
+                  </>
+                )}
 
                 {quizData.quizType === 'qa' && (
                   <input
@@ -261,9 +313,7 @@ const Createquiz = () => {
                 )}
 
                 {optionIndex > 1 && (
-                  <button onClick={() => handleRemoveOption(currentQuestionIndex, optionIndex)}>
-                    Delete Option
-                  </button>
+                  <button onClick={() => handleRemoveOption(currentQuestionIndex, optionIndex)}>Delete Option</button>
                 )}
               </div>
             ))}
@@ -274,9 +324,7 @@ const Createquiz = () => {
 
             {quizData.quizType !== 'poll' && (
               <div>
-                <label>
-                  Timer:
-                </label>
+                <label>Timer:</label>
                 <div>
                   <label>
                     <input
@@ -319,7 +367,9 @@ const Createquiz = () => {
       {quizPublished && (
         <div>
           <p>Congrats! Your Quiz is Published!</p>
-          <p>Your link is: <a href={`livequiz/${quizData.quizId}`}>{`/livequiz/${quizData.quizId}`}</a></p>
+          <p>
+            Your link is: <a href={`livequiz/${quizData.quizId}`}>{`/livequiz/${quizData.quizId}`}</a>
+          </p>
         </div>
       )}
     </div>

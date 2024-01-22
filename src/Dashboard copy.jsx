@@ -4,7 +4,6 @@ import axios from 'axios';
 const Dashboard = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [questionCount, setQuestionCount] = useState(0);
-  const [totalQuizImpressions, setTotalQuizImpressions] = useState(0);
 
   useEffect(() => {
     // Fetch quizzes with respective impressions when the component mounts
@@ -14,13 +13,7 @@ const Dashboard = () => {
 
         // Fetch quizzes with impressions
         const quizResponse = await axios.get(`http://localhost:3000/api/quizzesWithImpressions/${userId}`);
-        const fetchedQuizzes = quizResponse.data.quizzes;
-        
-        // Calculate total quiz impressions
-        const totalQuizImpressions = fetchedQuizzes.reduce((total, quiz) => total + quiz.impressionofQuiz, 0);
-        setTotalQuizImpressions(totalQuizImpressions);
-
-        setQuizzes(fetchedQuizzes);
+        setQuizzes(quizResponse.data.quizzes);
 
         const questionResponse = await axios.get(`http://localhost:3000/api/questionCount/${userId}`);
         setQuestionCount(questionResponse.data.questionCount);
@@ -36,14 +29,19 @@ const Dashboard = () => {
     <div>
       <h1>Dashboard</h1>
       <p>Total quizzes created: {quizzes.length}</p>
-      <p>Total questions created: {questionCount}</p>
-      <p>Total quiz impressions: {totalQuizImpressions}</p>
 
       <h2>List of Quizzes with Impressions</h2>
       <ul>
         {quizzes.map((quiz) => (
           <li key={quiz._id}>
             <strong>{quiz.quizName}</strong> - Impressions: {quiz.impressionofQuiz}
+            {/* <ul>
+              {quiz.questions.map((question, index) => (
+                <li key={index}>
+                  <strong>Question {index + 1}:</strong> {question.question} - Impressions: {question.impressionofQuestion}
+                </li>
+              ))}
+            </ul> */}
           </li>
         ))}
       </ul>
