@@ -18,15 +18,30 @@ const quizSchema = new mongoose.Schema({
   quizName: String,
   quizType: String,
   numQuestions: Number,
-  questions: [{
-    question: String,
-    options: [String],
-    correctOption: Number,
-    optionType: String,
-    timer: String,
-    impressionofQuestion: Number,
-  }],
+  questions: [
+    {
+      question: String,
+      options: [
+        {
+          option: String,
+          impressionofOption: Number,
+        },
+      ],
+      correctOption: Number,
+      optionType: String,
+      timer: String,
+      impressionofQuestion: Number,
+      answeredCorrectly: {
+        type : Number,
+        default : 0,
+      },
+    },
+  ],
   impressionofQuiz: Number,
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const Quiz = mongoose.model('Quiz', quizSchema);
@@ -89,7 +104,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, { expiresIn: '1d' });
 
     res.status(200).json({ success: true, userId: user._id, token });
   } catch (error) {
@@ -149,6 +164,34 @@ app.get('/api/questionCount/:userId', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+app.get('/api/quizzesWithImpressions/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    // Fetch quizzes with impressions
+    const quizzes = await Quiz.find({ userId }).select('-questions.options'); // Exclude options for brevity
+
+    res.json({ quizzes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/api/getquiz/:quizId', async (req, res) => {
+  try {
+    const _id = req.params.quizId;
+    
+    // Fetch quizzes with impressions
+    const quiz = await Quiz.findOne({ _id });
+
+    res.json({ quiz });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
