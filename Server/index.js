@@ -30,7 +30,10 @@ const quizSchema = new mongoose.Schema({
       correctOption: Number,
       optionType: String,
       timer: String,
-      impressionofQuestion: Number,
+      impressionofQuestion: {
+        type: Number,
+        default : 0,
+      },
       answeredCorrectly: {
         type : Number,
         default : 0,
@@ -187,13 +190,33 @@ app.get('/api/getquiz/:quizId', async (req, res) => {
     
     // Fetch quizzes with impressions
     const quiz = await Quiz.findOne({ _id });
-
     res.json({ quiz });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+app.post('/api/updateQuiz', async (req, res) => {
+  try {
+    const quiz = req.body.quizData;
+    if (!quiz._id) {
+      return res.status(400).json({ error: 'Quiz ID is required' });
+    }
+
+    const result = await Quiz.findByIdAndUpdate(quiz._id, { $set: quiz }, { new: true });
+
+    if (!result) {
+      return res.status(404).json({ error: 'Quiz not found' });
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
