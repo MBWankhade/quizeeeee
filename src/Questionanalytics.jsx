@@ -6,6 +6,7 @@ const Questionanalytics = () => {
     const {quizId} = useParams();
   const [questions, setQuestions] = useState([]);
   const [quiztype,setQuiztype] = useState(null);
+  const [currentquiz, setCurrentquiz] = useState({});
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -15,7 +16,9 @@ const Questionanalytics = () => {
         // Fetch quizzes with impressions
         const quiz = await axios.get(`http://localhost:3000/api/getquiz/${quizId}`);
         const fetchedquiz = quiz.data.quiz;
+        console.log(fetchedquiz)
         setQuiztype(fetchedquiz.quizType);
+        setCurrentquiz(fetchedquiz);
         setQuestions(fetchedquiz.questions);
       } catch (error) {
         console.error(error);
@@ -27,6 +30,7 @@ const Questionanalytics = () => {
 
   return (
     <div>
+      Created on {currentquiz.date}   has impressions  {currentquiz.impressionofQuiz}
       {quiztype === "poll" ?
       <>
         <ul>
@@ -35,7 +39,7 @@ const Questionanalytics = () => {
           <p>Q.{index + 1} : {questionInfo.question}</p>
           {questionInfo.options.map((opt, optIndex) => (
             // Add a return statement here
-            <p key={optIndex}>No of people opted for {opt.option} is {opt.impressionofOption}</p>
+            <p key={optIndex}>No of people opted for Option {optIndex+1} is {opt.impressionofOption}</p>
           ))}
         </li>
       ))}

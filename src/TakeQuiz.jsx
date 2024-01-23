@@ -11,10 +11,11 @@ const TakeQuiz = () => {
     // Fetch quiz data based on quizId from the server
     const fetchQuizData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/quiz/${quizId}`); // Replace with your actual API endpoint
+        const response = await fetch(`http://localhost:3000/api/getquiz/${quizId}`); // Replace with your actual API endpoint
         const data = await response.json();
-        if (data.success) {
-          setQuizData(data.quizData);
+        console.log(data.quiz)
+        if (data) {
+          setQuizData(data.quiz);
         } else {
           // Handle error
           console.error(data.error);
