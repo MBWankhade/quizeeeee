@@ -187,12 +187,27 @@ const Createquiz = () => {
   return (
     <div>
       {showQuizDetails && (
-        <>
-          <label>
-            Quiz Name:
-            <input type="text" value={quizData.quizName} onChange={handleQuizNameChange} />
-          </label>
-
+        <div style={{
+          width: '845px',
+          height: '422px',
+          flexShrink: 0,
+          borderRadius: '10px',
+          background: '#FFF',
+        }}>
+          <input 
+            type="text" 
+            placeholder='Quiz name '
+            value={quizData.quizName} 
+            onChange={handleQuizNameChange} 
+            style={{
+              width: '673px',
+              height: '81px',
+              flexShrink: 0,
+              borderRadius: '10px',
+              background: '#FFF',
+              boxShadow: '0px 0px 25px 0px rgba(0, 0, 0, 0.15)',
+            }}
+          />
           <br />
 
           <label>
@@ -207,7 +222,7 @@ const Createquiz = () => {
           <br />
 
           <button onClick={handleContinue}>Continue</button>
-        </>
+        </div>
       )}
 
       {!showQuizDetails && !quizPublished && (

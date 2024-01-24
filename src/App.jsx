@@ -7,14 +7,18 @@ import Dashboard from './Dashboard';
 import Quizanalysis from './Quizanalysis';
 import Questionanalytics from './Questionanalytics';
 import Livequiz from './Livequiz';
+import Login from './Login';
+import Landingpage from './Landingpage';
 
 function App() {
   return (
     <>
       <Router>
         <Routes>
+          <Route path='/' element={<Landingpage/>}></Route>
           <Route path='/create-quiz' element={<Createquiz />} />
           <Route path='/signup' element={<Signup />} />
+          <Route path='/login' element={<Login />} />
           <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/livequiz/:quizId' element={<Livequiz />} />
           <Route path='/quizanalysis' element={<Quizanalysis />} />
